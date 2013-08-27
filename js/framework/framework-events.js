@@ -29,10 +29,14 @@
       e.addEventListener(type, callback);
     },
 
+    off: function(type, callback, element) {
+      element.removeEventListener(type, callback);
+    },
+
     // Register for a new gesture event on the given element
     onGesture: function(type, callback, element) {
       var listener = new framework.GestureListener(type, callback, element);
-      framework.GestureListener.addListener(listener);
+      framework.GestureController.addListener(listener);
       return listener;
     },
 
@@ -79,7 +83,10 @@
   
   // Map some convenient top-level functions for event handling
   framework.on = framework.EventController.on;
+  framework.off = framework.EventController.off;
   framework.trigger = framework.EventController.trigger;
+  framework.onGesture = framework.EventController.onGesture;
+  framework.offGesture = framework.EventController.offGesture;
 
   // Set up various listeners
   window.addEventListener('click', framework.EventController.handleClick);

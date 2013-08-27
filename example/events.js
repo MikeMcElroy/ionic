@@ -9,17 +9,17 @@ var logEvent = function(data) {
 var tb = document.getElementById('tap-button');
 var sb = document.getElementById('swipe-button');
 
-window.FM.onGesture('tap', function(e) {
-  console.log('GOT TAP', e);
-  logEvent({
-    type: 'tap',
-    event: e
-  });
-}, tb);
 window.FM.onGesture('touch', function(e) {
   console.log('GOT TOUCH', e);
   logEvent({
     type: 'touch',
+    event: e
+  });
+}, tb);
+window.FM.onGesture('tap', function(e) {
+  console.log('GOT TAP', e);
+  logEvent({
+    type: 'tap',
     event: e
   });
 }, tb);

@@ -10,9 +10,9 @@
 
   // Simple touch gesture that triggers an event when an element is touched
   framework.Gesture.Touch = {
-    handle: function(listener, e) {
+    handle: function(gesture, e) {
       if(e.type == 'touchstart') {
-        listener.trigger('touch', e);
+        gesture.listener.trigger('touch', e);
         //framework.GestureController.triggerGestureEvent('touch', e);
       }
     }
@@ -20,7 +20,7 @@
 
   // Simple tap gesture
   framework.Gesture.Tap = {
-    handle: function(listener, e) {
+    handle: function(gesture, e) {
       switch(e.type) {
         case 'touchstart':
           this._touchStartX = e.touches[0].clientX;
@@ -44,7 +44,7 @@
         case 'touchend':
           if(this._hasMoved == false) {
             //framework.GestureController.triggerGestureEvent('tap', e);
-            listener.trigger('tap', e);
+            gesture.listener.trigger('tap', e);
           }
           break;
       }
@@ -53,10 +53,10 @@
 
   // The gesture is over, trigger a release event
   framework.Gesture.Release = {
-    handle: function(listener, e) {
+    handle: function(gesture, e) {
       if(e.type === 'touchend') {
         //framework.GestureController.triggerGestureEvent('release', e);
-        listener.trigger('release', e);
+        gesture.listener.trigger('release', e);
       }
     }
   };
@@ -64,7 +64,7 @@
   // A swipe gesture that emits the 'swipe' event when a left swipe happens
   framework.Gesture.Swipe = {
     swipe_velocity: 0.7,
-    handle: function(listener, e) {
+    handle: function(gesture, e) {
       if(e.type == 'touchend') {
 
         if(e.velocityX > this.swipe_velocity ||
@@ -73,9 +73,9 @@
           // trigger swipe events, both a general swipe,
           // and a directional swipe
           //framework.GestureController.triggerGestureEvent('swipe', e);
-          listener.trigger('swipe', e);
+          gesture.trigger('swipe', e);
           //framework.GestureController.triggerGestureEvent('swipe' + e.direction, e);
-          listener.trigger('swipe' + e.direction, e);
+          gesture.trigger('swipe' + e.direction, e);
         }
       }
     }
@@ -89,17 +89,24 @@
       
     // Bind the event listener
     element.addEventListener(type, callback);
+
+    var self = this;
+    element.addEventListener('touchstart', function(e) {
+      framework.GestureController.startGesture(e, self);
+    });
   };
 
 
   framework.GestureListener.prototype = {
-    trigger: function(type, target) {
-      if(!this.childOf(target, this.element)) {
+    trigger: function(type, e) {
+      if(!this.childOf(e.target, this.element)) {
         console.error('Not triggering gesture on non-child of target element');
       }
 
       // Trigger the event on the parent, not any child
-      framework.EventController.trigger(type, data, target);
+      framework.EventController.trigger(type, {
+        target: this.element
+      });
     },
     destroy: function() {
       this.element.removeEventListener(this.type, this.callback);
@@ -132,14 +139,18 @@
     init: function() {
       var self = this;
 
+      /*
       window.addEventListener('touchstart', function(e) {
         var eventData = self._getFakeEvent(e);
         framework.GestureController.startGesture(eventData);
       });
+      */
       window.addEventListener('touchmove', function(e) {
+        var eventData = self._annotateGestureEvent(e);
         framework.GestureController.detectGesture(eventData);
       });
       window.addEventListener('touchend', function(e) {
+        var eventData = self._annotateGestureEvent(e);
         framework.GestureController.detectGesture(eventData);
       });
       window.addEventListener('touchcancel', this.endGesture);
@@ -153,6 +164,7 @@
 
       //framework.EventController.trigger(type, framework.Utils.extend({}, e));
     },
+
 
     // Add a new gesture listener.
     addListener: function(listener) {
@@ -286,7 +298,7 @@
       var eventData = this._annotateGestureEvent(e);
 
       for(i = 0; i < this.gestures.length; i++) {
-        if(this.gestures[i].handle(eventData) === false) {
+        if(this.gestures[i].handle(this.currentGesture, eventData) === false) {
           console.log('GESTURECONTROLLER: Gesture handled and stopped.');
           this.endGesture(eventData);
           return;
@@ -435,4 +447,7 @@
       }
     }
   }
+
+  // Initialize the GestureController
+  framework.GestureController.init();
 })(this, document, FM = this.FM || {});
