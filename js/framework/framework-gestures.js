@@ -73,9 +73,9 @@
           // trigger swipe events, both a general swipe,
           // and a directional swipe
           //framework.GestureController.triggerGestureEvent('swipe', e);
-          gesture.trigger('swipe', e);
+          gesture.listener.trigger('swipe', e);
           //framework.GestureController.triggerGestureEvent('swipe' + e.direction, e);
-          gesture.trigger('swipe' + e.direction, e);
+          gesture.listener.trigger('swipe' + e.direction, e);
         }
       }
     }

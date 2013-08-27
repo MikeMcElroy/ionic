@@ -16,6 +16,7 @@ window.FM.onGesture('touch', function(e) {
     event: e
   });
 }, tb);
+
 window.FM.onGesture('tap', function(e) {
   console.log('GOT TAP', e);
   logEvent({
